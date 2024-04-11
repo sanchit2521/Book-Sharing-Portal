@@ -77,8 +77,7 @@ $html='<!DOCTYPE html>
     <div class="invoice">
           <div class="section-top">
             <div class="logo">
-                <a><span>Bookflix &</span>
-                    <span class="me">Chill</span></a>
+                <a><span>Book Sharing Portal &</span>
             </div>
             <div class="invoice-title">Invoice Details</div>
           </div>
@@ -89,22 +88,22 @@ $html='<!DOCTYPE html>
           <h3>SHIPPING ADDRESS:</h3>
           <div class="buyer-details">
               <p class="buyer-name">To,   '.$fetch_order['name'].' </p>
-              <p class="buyer-add"> '.$fetch_details['address'].'</p>
-              <p class="buyer-area"> '.$fetch_details['city'].'</p>
-              <p class="buyer-city"> '.$fetch_details['state'].'</p>
-              <p class="buyer-STATE"> '.$fetch_details['country'].'</p>
-              <p class="buyer-STATE"> '.$fetch_details['pincode'].'</p>
+              <p class="buyer-add"> Adress, '.$fetch_details['address'].'</p>
+              <p class="buyer-area"> city, '.$fetch_details['city'].'</p>
+              <p class="buyer-city"> state, '.$fetch_details['state'].'</p>
+              <p class="buyer-STATE"> Country,  '.$fetch_details['country'].'</p>
+              <p class="buyer-STATE"> Pincode,'.$fetch_details['pincode'].'</p>
           </div>
-        </div></th>
+          </div></th>
           <th class="details"><div class="section-mid-one"><h3>SOLD BY:</h3>
           <div class="buyer-details">
-              <p class="buyer-name">By,  Bookflix & Chill</p>
-              <p class="buyer-add">xasxs</p>
-              <p class="buyer-area">xwaxw</p>
-              <p class="buyer-city">xawxsssxzq</p>
-              <p class="buyer-STATE">xwasx</p>
+              <p class="buyer-name">By,  Book Sharing Portal</p>
+              <p class="buyer-add">Adress</p>
+              <p class="buyer-area">Area</p>
+              <p class="buyer-city">city</p>
+              <p class="buyer-STATE">state</p>
           </div>
-      </div></th>
+          </div></th>
           <th class="details"><div class="section-mid-one"><h3>Details:</h3>
             <div class="buyer-details">
                 <p class="buyer-name">Invoice Date:  '.$fetch_order['date'].'</p>
@@ -157,7 +156,7 @@ $html='<!DOCTYPE html>
       </div>
       <hr />
       <div>
-        <div class="sign">Bookflix & Chill</div>
+        <div class="sign">Book Sharing Portal</div>
       </div>
     </div>
   </body>

@@ -27,6 +27,13 @@ if (isset($_POST['login'])) {
                 header('location:index.php');
             }
         }
+        elseif ($row['user_type'] == 'NGO') {
+            $_SESSION['user_name'] = $row['name'];
+            $_SESSION['user_email'] = $row['email'];
+            $_SESSION['user_id'] = $row['Id'];
+            header('location:index.php');
+        }
+    
         else {
             $message[] = 'Incorrect Email Id or Password!';
         }

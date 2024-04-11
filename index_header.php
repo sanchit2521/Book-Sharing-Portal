@@ -115,26 +115,52 @@ font-weight: 600;
             </div>
         </div>
         <!-- <a href="contact-us.php">Contact US</a> -->
-        <a href="cart.php">Cart</a>
-        <a href="orders.php">Orders</a>
+        <a href="<?php echo $messages_link; ?>">Messages</a>
+        <a href="show_ebook.php">E-BOOKS</a>
         <a href="<?php echo isset($_SESSION['user_id']) ? 'sell_book.php' : 'login.php'; ?>">Sell a book</a>
+        <a href="<?php echo isset($_SESSION['user_id']) ? 'donate_book.php' : 'login.php'; ?>">Donate a book</a>
     </div>
     <div class="user-box" style="display: flex; align-items:center;">
     <a class="Btn" href="search_books.php"><img style="height:30px;" src="./images/sea2.png" alt=""></a>
     <?php if(isset($_SESSION['user_name'])){echo' <img style="height:40px; margin-left:10px ;" src="images/ds2.png" class="user-pic" onclick="toggleMenu()" />';}
       else{
-        echo'<div class="use_links"><a class="link_Btn" style="background-color: rgb(0, 167, 245);
-        padding: 6px;
-        border-radius: 10px;
-        margin-left: 10px;
-        color: white;
-        font-weight: 500;" href="login.php">Login</a><a class="link_Btn" style="background-color: rgb(0, 167, 245);
-        padding: 6px;
-        border-radius: 10px;
-        margin-left: 10px;
-        color: white;
-        font-weight: 500;" href="register.php">Register</a></div>';
+          echo '<div class="use_links">
+          <div class="link_Btn" style="background-color: rgb(0, 167, 245);
+              padding: 6px;
+              border-radius: 10px;
+              margin-left: 10px;
+              color: white;
+              font-weight: 500;
+              position: relative;" onmouseover="showOptions(this)" onmouseout="hideOptions(this)">
+              Login
+              <div class="options" style="position: absolute; top: 100%; left: 0; background-color: white; color: black; padding: 6px; border-radius: 5px; display: none;">
+                  <button onclick="window.location.href=\'login.php\';">Admin</button><br>
+                  <button onclick="window.location.href=\'login.php\';">User</button><br>
+                  <button onclick="window.location.href=\'login_ngo.php\';">NGO</button><br>
+              </div>
+          </div>
+          <a class="link_Btn" style="background-color: rgb(0, 167, 245);
+              padding: 6px;
+              border-radius: 10px;
+              margin-left: 10px;
+              color: white;
+              font-weight: 500;" href="register.php">Register</a>
+      </div>';
 
+      echo '<script>
+          function showOptions(element) {
+              var options = element.querySelector(".options");
+              options.style.display = "block";
+          }
+
+          function hideOptions(element) {
+              var options = element.querySelector(".options");
+              options.style.display = "none";
+          }
+      </script>';
+
+
+  
     }?>
      </div>
      
@@ -159,6 +185,10 @@ font-weight: 600;
     </a>
     <a href="orders.php" class="sub-menu-link">
       <p>Order history</p>
+      <span>></span>
+    </a>
+    <a href="bid.php" class="sub-menu-link">
+      <p>Auction a book</p>
       <span>></span>
     </a>
     <a href="logout.php" class="sub-menu-link">

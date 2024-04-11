@@ -67,15 +67,15 @@
     ?>
     <div class="container">
       <form action="" method="post">
-         <h3 style="color:white">Register to Use <a href="index.php"><span>Bookflix &  </span><span>Chill</span></a></h3>
-         <input type="text" name="Name" placeholder="Enter Name" required class="text_field ">
+         <h3 style="color:white">Register to Use <a href="index.php"><span>Book Sharing Portal </span></a></h3>
+         <input type="text" name="Name" placeholder="Enter your Name or NGO's Name" required class="text_field ">
          <input type="text" name="Sname" placeholder="Enter Surname" required class="text_field">
          <input type="email" name="email" placeholder="Enter Email Id" required class="text_field">
          <input type="password" name="password" placeholder="Enter password" required class="text_field">
          <input type="password" name="cpassword" placeholder="Confirm password" required class="text_field">
          <select name="user_type" id="" required class="text_field">
             <option value="User">User</option>
-            <option value="Admin">Admin</option>
+            <option value="NGO">NGO</option>
          </select>
          <input type="submit" value="Register" name="submit" class="btn text_field">
          <p>Already have a Account? <br> <a class="link" href="login.php">Login</a><a class="link" href="index.php">Back</a></p>

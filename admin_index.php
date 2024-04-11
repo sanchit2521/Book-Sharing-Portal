@@ -11,6 +11,8 @@ if(!isset($admin_id)){
 
 $users_no = $conn->query("SELECT * FROM users_info ") or die('query failed');
 $usercount = mysqli_num_rows( $users_no );
+$users_no = $conn->query("SELECT * FROM donated_books ") or die('query failed');
+$donationcount = mysqli_num_rows( $users_no );
 $admin_no = $conn->query("SELECT * FROM users_info WHERE user_type='Admin' ") or die('query failed');
 $admin_count = mysqli_num_rows( $admin_no );
 $books_no = $conn->query("SELECT * FROM book_info ") or die('query failed');
@@ -134,6 +136,16 @@ $msgcount = mysqli_num_rows( $msg_no );
             <?php echo $usercount; ?>
           </p>
           <a href="users_detail.php" class="btn btn-primary">Details</a>
+        </div>
+      </div>
+      <div class="card" style="width: 15rem">
+        <img class="card-img-top" src="./images/donation.jpg" alt="Card image cap" />
+        <div class="card-body">
+          <h5 class="card-title">Donation of books</h5>
+          <p class="card-text">
+            <?php echo $donationcount; ?>
+          </p>
+          <a href="show_donation.php" class="btn btn-primary">Donation Details</a>
         </div>
       </div>
     </div>

@@ -280,7 +280,7 @@ if (isset($_POST['checkout'])) {
             <div class="col-50">
               <h3>Billing Address</h3>
               <label for="fname"><i class="fa fa-user"></i> Full Name</label>
-              <input type="text" id="fname" name="firstname" placeholder="Pawan Mishra">
+              <input type="text" id="fname" name="firstname" placeholder="Enter your name">
               <label for="email"><i class="fa fa-envelope"></i> Email</label>
               <input type="text" id="email" name="email" placeholder="example@gmail.com">
               <label for="email"><i class="fa fa-envelope"></i> Number</label>

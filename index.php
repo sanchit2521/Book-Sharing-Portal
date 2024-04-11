@@ -1,40 +1,52 @@
 <?php
 include 'config.php';
 
-error_reporting(0);
 session_start();
 
 $user_id = $_SESSION['user_id'];
+$user_name = $_SESSION['user_name'];
 
-if (isset($_POST['buy_now'])) {
-    if (!isset($user_id)) {
-        $message[] = 'Please Login to get your books';
-    } else {
-        $book_name = $_POST['book_name'];
-        $book_id = $_POST['book_id'];
-        $book_image = $_POST['book_image'];
-        $book_Price = $_POST['book_Price'];
-        $book_quantity = '1';
-
-        $total_Price = number_format($book_Price * $book_quantity);
-
-        $select_book = $conn->query("SELECT * FROM cart WHERE book_id= '$book_id' AND user_id='$user_id' ") or die('query failed');
-
-        if (mysqli_num_rows($select_book) > 0) {
-            $message[] = 'This Book is alredy in your cart';
-        } else {
-            $conn->query("INSERT INTO cart (`user_id`,`book_id`,`name`, `Price`, `image`,`quantity` ,`total`) VALUES('$user_id','$book_id','$book_name','$book_Price','$book_image','$book_quantity', '$total_Price')") or die('Add to cart Query failed');
-            $message[] = 'Book Added To Cart Successfully';
-            // Redirect to cart page after adding to cart
-            header('Location: cart.php');
-            exit;
-            //header('location:index.php');
-        }
-    }
+if (!isset($user_id)) {
+    header('location:login.php');
 }
 
+if (isset($_POST['buy_now'])) {
+    $book_id = $_POST['book_id'];
+    $book_name = $_POST['book_name'];
+    $book_image = $_POST['book_image'];
 
+    // Fetch price from book_info table based on book_id
+    $book_info_query = $conn->query("SELECT Price FROM book_info WHERE book_id = '$book_id'");
+    if ($book_info_query->num_rows > 0) {
+        $book_info = $book_info_query->fetch_assoc();
+        $book_price = $book_info['Price'];
+
+        // Check if the book already exists in the cart
+        $select_book = $conn->query("SELECT * FROM cart WHERE book_id = '$book_id' AND user_id = '$user_id'");
+        if ($select_book->num_rows > 0) {
+            // If the book is already in the cart, increase the quantity by 1
+            $update_quantity_query = "UPDATE cart SET quantity = quantity + 1 WHERE book_id = '$book_id' AND user_id = '$user_id'";
+            $conn->query($update_quantity_query) or die('Update quantity query failed');
+            $message[] = 'Quantity updated successfully';
+        } else {
+            // If the book is not in the cart, add it with quantity = 1
+            $book_quantity = 1;
+            $total_price = $book_price * $book_quantity;
+            $insert_query = "INSERT INTO cart (`user_id`, `book_id`, `name`, `price`, `image`, `quantity`, `total`) 
+                            VALUES ('$user_id', '$book_id', '$book_name', '$book_price', '$book_image', '$book_quantity', '$total_price')";
+            $conn->query($insert_query) or die('Add to cart query failed');
+            $message[] = 'Book added to cart successfully';
+        }
+    } else {
+        $message[] = 'Failed to add book to cart. Book price not found.';
+    }
+
+    // Redirect to the cart page after adding the book to the cart
+    header('Location: cart.php');
+    exit;
+}
 ?>
+
 <!DOCTYPE html>
 <html lang="en">
 
@@ -95,7 +107,7 @@ if (isset($_POST['buy_now'])) {
     ?>
 
 
-    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+    <!-- <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
     <div id="carouselExampleIndicators" class="carousel slide" data-ride="carousel">
@@ -124,7 +136,7 @@ if (isset($_POST['buy_now'])) {
             <span class="carousel-control-next-icon" aria-hidden="true"></span>
             <span class="sr-only">Next</span>
         </a>
-    </div>
+    </div> -->
 
     <section id="New">
     <div class="container px-5 mx-auto">
@@ -136,27 +148,32 @@ if (isset($_POST['buy_now'])) {
     <section class="show-products">
         <div class="box-container">
             <?php
-            $select_book = mysqli_query($conn, "SELECT * FROM `book_info` ORDER BY date DESC LIMIT 8") or die('query failed');
+            $select_book = mysqli_query($conn, "SELECT * FROM `book_info` ORDER BY `date` DESC LIMIT 8") or die('query failed');
             if (mysqli_num_rows($select_book) > 0) {
                 while ($fetch_book = mysqli_fetch_assoc($select_book)) {
-                    ?>
-
+                    // Fetch user details for each book
+                    $added_by = $fetch_book['added_by'];
+                    $select_user = mysqli_query($conn, "SELECT `name`, `surname`, `user_type` FROM `users_info` WHERE `Id` = '$added_by'");
+                    $user_details = mysqli_fetch_assoc($select_user);
+            ?>
                     <div class="box" style="width: 255px; height:355px;">
-                        <a href="book_details.php?details=<?php echo $fetch_book['book_id'];
-                                                            echo '-Title=', $fetch_book['Title']; ?>"> <img style="height: 200px;width: 125px;margin: auto;" class="books_images" src="added_books/<?php echo $fetch_book['image']; ?>" alt=""></a>
+                        <a href="book_details.php?details=<?php echo $fetch_book['book_id']; ?>&title=<?php echo $fetch_book['Title']; ?>">
+                            <img style="height: 200px;width: 125px;margin: auto;" class="books_images" src="added_books/<?php echo $fetch_book['image']; ?>" alt="">
+                        </a>
                         <div style="text-align:left ;">
-
-                        <div style="font-weight: 500; font-size:18px; text-align: left; overflow: auto;" class="Title"> <?php echo $fetch_book['Title']; ?></div>
-
+                            <div style="font-weight: 500; font-size:18px; text-align: left; overflow: auto;" class="Title"> <?php echo $fetch_book['Title']; ?></div>
                         </div>
                         <div class="Price">Price: ₹ <?php echo $fetch_book['Price']; ?>/-</div>
+                        <?php if ($user_details) { ?>
+                            <div class="AddedBy">Added By: <?php echo $user_details['name'] . ' ' . $user_details['surname'] . ' (' . $user_details['user_type'] . ')'; ?></div>
+                        <?php } ?>
                         <form action="" method="POST">
                             <input class="hidden_input" type="hidden" name="book_name" value="<?php echo $fetch_book['Title'] ?>">
-                            <input class="hidden_input" type="hidden" name="book_id" value="<?php echo $fetch_book['bid'] ?>">
+                            <input class="hidden_input" type="hidden" name="book_id" value="<?php echo $fetch_book['book_id'] ?>">
                             <input class="hidden_input" type="hidden" name="book_image" value="<?php echo $fetch_book['image'] ?>">
                             <input class="hidden_input" type="hidden" name="book_Price" value="<?php echo $fetch_book['Price'] ?>">
                             <button type="submit" name="buy_now"><img src="./images/cart2.png"> BUY NOW</button>
-                            <button onclick="myFunction()" name="add_to_cart"><img src="">
+                            <button onclick="myFunction()" name="add_to_cart">
                                 <a href="show_info.php?details=<?php echo $fetch_book['book_id']; ?>&name=<?php echo $fetch_book['Title']; ?>" class="update_btn">Know More</a>
                             </button>
                         </form>
@@ -164,11 +181,13 @@ if (isset($_POST['buy_now'])) {
             <?php
                 }
             } else {
-                echo '<p class="empty">no products added yet!</p>';
+                echo '<p class="empty">No products added yet!</p>';
             }
             ?>
         </div>
     </section>
+
+
 
     
     
@@ -185,6 +204,9 @@ if (isset($_POST['buy_now'])) {
             $select_book = mysqli_query($conn, "SELECT * FROM `book_info` where category_name='Arts'") or die('query failed');
             if (mysqli_num_rows($select_book) > 0) {
                 while ($fetch_book = mysqli_fetch_assoc($select_book)) {
+                    $added_by = $fetch_book['added_by'];
+                    $select_user = mysqli_query($conn, "SELECT `name`, `surname`, `user_type` FROM `users_info` WHERE `Id` = '$added_by'");
+                    $user_details = mysqli_fetch_assoc($select_user);
             ?>
 
                     <div class="box" style="width: 255px;height: 355px;">
@@ -195,6 +217,9 @@ if (isset($_POST['buy_now'])) {
                             <div style="font-weight: 500; font-size:18px; text-align: center; " class="Title"> <?php echo $fetch_book['Title']; ?></div>
                         </div>
                         <div class="Price">Price: ₹ <?php echo $fetch_book['Price']; ?>/-</div>
+                        <?php if ($user_details) { ?>
+                            <div class="AddedBy">Added By: <?php echo $user_details['name'] . ' ' . $user_details['surname'] . ' (' . $user_details['user_type'] . ')'; ?></div>
+                        <?php } ?>
                         <!-- <button name="add_cart"><img src="./images/cart2.png" alt=""></button> -->
                         <form action="" method="POST">
                             <input class="hidden_input" type="hidden" name="book_name" value="<?php echo $fetch_book['Title'] ?>">
@@ -232,16 +257,22 @@ if (isset($_POST['buy_now'])) {
             $select_book = mysqli_query($conn, "SELECT * FROM `book_info` where category_name='Pure Science'") or die('query failed');
             if (mysqli_num_rows($select_book) > 0) {
                 while ($fetch_book = mysqli_fetch_assoc($select_book)) {
+                    $added_by = $fetch_book['added_by'];
+                    $select_user = mysqli_query($conn, "SELECT `name`, `surname`, `user_type` FROM `users_info` WHERE `Id` = '$added_by'");
+                    $user_details = mysqli_fetch_assoc($select_user);
             ?>
 
                     <div class="box" style="width: 255px;height: 355px;">
-                        <a href="book_details.php?details=<?php echo $fetch_book['bid'];
-                                                            echo '-name=', $fetch_book['name']; ?>"> <img style="height: 200px;width: 125px;margin: auto;" class="books_images" src="added_books/<?php echo $fetch_book['image']; ?>" alt=""></a>
+                        <a href="book_details.php?details=<?php echo $fetch_book['book_id'];
+                                                            echo '-Title=', $fetch_book['Title']; ?>"> <img style="height: 200px;width: 125px;margin: auto;" class="books_images" src="added_books/<?php echo $fetch_book['image']; ?>" alt=""></a>
                         <div style="text-align:left ;">
 
                             <div style="font-weight: 500; font-size:18px; text-align: center;" class="Title"> <?php echo $fetch_book['Title']; ?></div>
                         </div>
                         <div class="Price">Price: ₹ <?php echo $fetch_book['Price']; ?>/-</div>
+                        <?php if ($user_details) { ?>
+                            <div class="AddedBy">Added By: <?php echo $user_details['name'] . ' ' . $user_details['surname'] . ' (' . $user_details['user_type'] . ')'; ?></div>
+                        <?php } ?>
                         <!-- <button name="add_cart"><img src="./images/cart2.png" alt=""></button> -->
                         <form action="" method="POST">
                             <input class="hidden_input" type="hidden" name="book_name" value="<?php echo $fetch_book['Title'] ?>">
@@ -278,16 +309,22 @@ if (isset($_POST['buy_now'])) {
             $select_book = mysqli_query($conn, "SELECT * FROM `book_info` Where category_name='CLAT'") or die('query failed');
             if (mysqli_num_rows($select_book) > 0) {
                 while ($fetch_book = mysqli_fetch_assoc($select_book)) {
+                    $added_by = $fetch_book['added_by'];
+                    $select_user = mysqli_query($conn, "SELECT `name`, `surname`, `user_type` FROM `users_info` WHERE `Id` = '$added_by'");
+                    $user_details = mysqli_fetch_assoc($select_user);
             ?>
 
                     <div class="box" style="width: 255px;height: 355px;">
-                        <a href="book_details.php?details=<?php echo $fetch_book['bid'];
-                                                            echo '-name=', $fetch_book['name']; ?>"> <img style="height: 200px;width: 125px;margin: auto;" class="books_images" src="added_books/<?php echo $fetch_book['image']; ?>" alt=""></a>
+                        <a href="book_details.php?details=<?php echo $fetch_book['book_id'];
+                                                            echo '-Title=', $fetch_book['Title']; ?>"> <img style="height: 200px;width: 125px;margin: auto;" class="books_images" src="added_books/<?php echo $fetch_book['image']; ?>" alt=""></a>
                         <div style="text-align:left ;">
 
                             <div style="font-weight: 500; font-size:18px; text-align: center;" class="Title"> <?php echo $fetch_book['Title']; ?></div>
                         </div>
                         <div class="Price">Price: ₹ <?php echo $fetch_book['Price']; ?>/-</div>
+                        <?php if ($user_details) { ?>
+                            <div class="AddedBy">Added By: <?php echo $user_details['name'] . ' ' . $user_details['surname'] . ' (' . $user_details['user_type'] . ')'; ?></div>
+                        <?php } ?>
                         <!-- <button name="add_cart"><img src="./images/cart2.png" alt=""></button> -->
                         <form action="" method="POST">
                             <input class="hidden_input" type="hidden" name="book_name" value="<?php echo $fetch_book['Title'] ?>">
@@ -326,6 +363,9 @@ if (isset($_POST['buy_now'])) {
             $select_book = mysqli_query($conn, "SELECT * FROM `book_info` where category_name='MPSC'") or die('query failed');
             if (mysqli_num_rows($select_book) > 0) {
                 while ($fetch_book = mysqli_fetch_assoc($select_book)) {
+                    $added_by = $fetch_book['added_by'];
+                    $select_user = mysqli_query($conn, "SELECT `name`, `surname`, `user_type` FROM `users_info` WHERE `Id` = '$added_by'");
+                    $user_details = mysqli_fetch_assoc($select_user);
             ?>
 
                     <div class="box" style="width: 255px;height: 355px;">
@@ -336,6 +376,9 @@ if (isset($_POST['buy_now'])) {
                             <div style="font-weight: 500; font-size:18px; text-align: center; " class="Title"> <?php echo $fetch_book['Title']; ?></div>
                         </div>
                         <div class="Price">Price: ₹ <?php echo $fetch_book['Price']; ?>/-</div>
+                        <?php if ($user_details) { ?>
+                            <div class="AddedBy">Added By: <?php echo $user_details['name'] . ' ' . $user_details['surname'] . ' (' . $user_details['user_type'] . ')'; ?></div>
+                        <?php } ?>
                         <!-- <button name="add_cart"><img src="./images/cart2.png" alt=""></button> -->
                         <form action="" method="POST">
                             <input class="hidden_input" type="hidden" name="book_name" value="<?php echo $fetch_book['Title'] ?>">
@@ -377,6 +420,9 @@ if (isset($_POST['buy_now'])) {
             $select_book = mysqli_query($conn, "SELECT * FROM `book_info` where category_name='Agri'") or die('query failed');
             if (mysqli_num_rows($select_book) > 0) {
                 while ($fetch_book = mysqli_fetch_assoc($select_book)) {
+                    $added_by = $fetch_book['added_by'];
+                    $select_user = mysqli_query($conn, "SELECT `name`, `surname`, `user_type` FROM `users_info` WHERE `Id` = '$added_by'");
+                    $user_details = mysqli_fetch_assoc($select_user);
             ?>
 
                     <div class="box" style="width: 255px;height: 355px;">
@@ -387,6 +433,9 @@ if (isset($_POST['buy_now'])) {
                             <div style="font-weight: 500; font-size:18px; text-align: center; " class="Title"> <?php echo $fetch_book['Title']; ?></div>
                         </div>
                         <div class="Price">Price: ₹ <?php echo $fetch_book['Price']; ?>/-</div>
+                        <?php if ($user_details) { ?>
+                            <div class="AddedBy">Added By: <?php echo $user_details['name'] . ' ' . $user_details['surname'] . ' (' . $user_details['user_type'] . ')'; ?></div>
+                        <?php } ?>
                         <!-- <button name="add_cart"><img src="./images/cart2.png" alt=""></button> -->
                         <form action="" method="POST">
                             <input class="hidden_input" type="hidden" name="book_name" value="<?php echo $fetch_book['Title'] ?>">
@@ -430,6 +479,9 @@ if (isset($_POST['buy_now'])) {
             $select_book = mysqli_query($conn, "SELECT * FROM `book_info` where category_name='Pharmacy'") or die('query failed');
             if (mysqli_num_rows($select_book) > 0) {
                 while ($fetch_book = mysqli_fetch_assoc($select_book)) {
+                    $added_by = $fetch_book['added_by'];
+                    $select_user = mysqli_query($conn, "SELECT `name`, `surname`, `user_type` FROM `users_info` WHERE `Id` = '$added_by'");
+                    $user_details = mysqli_fetch_assoc($select_user);
             ?>
 
                     <div class="box" style="width: 255px;height: 355px;">
@@ -440,7 +492,10 @@ if (isset($_POST['buy_now'])) {
                             <div style="font-weight: 500; font-size:18px; text-align: center; " class="Title"> <?php echo $fetch_book['Title']; ?></div>
                         </div>
                         <div class="Price">Price: ₹ <?php echo $fetch_book['Price']; ?>/-</div>
-                        <!-- <button name="add_cart"><img src="./images/cart2.png" alt=""></button> -->
+                        
+                        <?php if ($user_details) { ?>
+                            <div class="AddedBy">Added By: <?php echo $user_details['name'] . ' ' . $user_details['surname'] . ' (' . $user_details['user_type'] . ')'; ?></div>
+                        <?php } ?><!-- <button name="add_cart"><img src="./images/cart2.png" alt=""></button> -->
                         <form action="" method="POST">
                             <input class="hidden_input" type="hidden" name="book_name" value="<?php echo $fetch_book['Title'] ?>">
                             <input class="hidden_input" type="hidden" name="book_image" value="<?php echo $fetch_book['image'] ?>">
@@ -484,6 +539,9 @@ if (isset($_POST['buy_now'])) {
             $select_book = mysqli_query($conn, "SELECT * FROM `book_info` where category_name='LAW'") or die('query failed');
             if (mysqli_num_rows($select_book) > 0) {
                 while ($fetch_book = mysqli_fetch_assoc($select_book)) {
+                    $added_by = $fetch_book['added_by'];
+                    $select_user = mysqli_query($conn, "SELECT `name`, `surname`, `user_type` FROM `users_info` WHERE `Id` = '$added_by'");
+                    $user_details = mysqli_fetch_assoc($select_user);
             ?>
 
                     <div class="box" style="width: 255px;height: 355px;">
@@ -494,6 +552,9 @@ if (isset($_POST['buy_now'])) {
                             <div style="font-weight: 500; font-size:18px; text-align: center; " class="Title"> <?php echo $fetch_book['Title']; ?></div>
                         </div>
                         <div class="Price">Price: ₹ <?php echo $fetch_book['Price']; ?>/-</div>
+                        <?php if ($user_details) { ?>
+                            <div class="AddedBy">Added By: <?php echo $user_details['name'] . ' ' . $user_details['surname'] . ' (' . $user_details['user_type'] . ')'; ?></div>
+                        <?php } ?>
                         <!-- <button name="add_cart"><img src="./images/cart2.png" alt=""></button> -->
                         <form action="" method="POST">
                             <input class="hidden_input" type="hidden" name="book_name" value="<?php echo $fetch_book['Title'] ?>">
@@ -537,6 +598,9 @@ if (isset($_POST['buy_now'])) {
             $select_book = mysqli_query($conn, "SELECT * FROM `book_info` where category_name='Medical'") or die('query failed');
             if (mysqli_num_rows($select_book) > 0) {
                 while ($fetch_book = mysqli_fetch_assoc($select_book)) {
+                    $added_by = $fetch_book['added_by'];
+                    $select_user = mysqli_query($conn, "SELECT `name`, `surname`, `user_type` FROM `users_info` WHERE `Id` = '$added_by'");
+                    $user_details = mysqli_fetch_assoc($select_user);
             ?>
 
                     <div class="box" style="width: 255px;height: 355px;">
@@ -547,6 +611,9 @@ if (isset($_POST['buy_now'])) {
                             <div style="font-weight: 500; font-size:18px; text-align: center; " class="Title"> <?php echo $fetch_book['Title']; ?></div>
                         </div>
                         <div class="Price">Price: ₹ <?php echo $fetch_book['Price']; ?>/-</div>
+                        <?php if ($user_details) { ?>
+                            <div class="AddedBy">Added By: <?php echo $user_details['name'] . ' ' . $user_details['surname'] . ' (' . $user_details['user_type'] . ')'; ?></div>
+                        <?php } ?>
                         <!-- <button name="add_cart"><img src="./images/cart2.png" alt=""></button> -->
                         <form action="" method="POST">
                             <input class="hidden_input" type="hidden" name="book_name" value="<?php echo $fetch_book['Title'] ?>">
@@ -591,6 +658,9 @@ if (isset($_POST['buy_now'])) {
             $select_book = mysqli_query($conn, "SELECT * FROM `book_info` where category_name='Engineering'") or die('query failed');
             if (mysqli_num_rows($select_book) > 0) {
                 while ($fetch_book = mysqli_fetch_assoc($select_book)) {
+                    $added_by = $fetch_book['added_by'];
+                    $select_user = mysqli_query($conn, "SELECT `name`, `surname`, `user_type` FROM `users_info` WHERE `Id` = '$added_by'");
+                    $user_details = mysqli_fetch_assoc($select_user);
             ?>
 
                     <div class="box" style="width: 255px;height: 355px;">
@@ -601,6 +671,9 @@ if (isset($_POST['buy_now'])) {
                             <div style="font-weight: 500; font-size:18px; text-align: center; " class="Title"> <?php echo $fetch_book['Title']; ?></div>
                         </div>
                         <div class="Price">Price: ₹ <?php echo $fetch_book['Price']; ?>/-</div>
+                        <?php if ($user_details) { ?>
+                            <div class="AddedBy">Added By: <?php echo $user_details['name'] . ' ' . $user_details['surname'] . ' (' . $user_details['user_type'] . ')'; ?></div>
+                        <?php } ?>
                         <!-- <button name="add_cart"><img src="./images/cart2.png" alt=""></button> -->
                         <form action="" method="POST">
                             <input class="hidden_input" type="hidden" name="book_name" value="<?php echo $fetch_book['Title'] ?>">
@@ -643,6 +716,9 @@ if (isset($_POST['buy_now'])) {
             $select_book = mysqli_query($conn, "SELECT * FROM `book_info` where category_name='UPSC'") or die('query failed');
             if (mysqli_num_rows($select_book) > 0) {
                 while ($fetch_book = mysqli_fetch_assoc($select_book)) {
+                    $added_by = $fetch_book['added_by'];
+                    $select_user = mysqli_query($conn, "SELECT `name`, `surname`, `user_type` FROM `users_info` WHERE `Id` = '$added_by'");
+                    $user_details = mysqli_fetch_assoc($select_user);
             ?>
 
                     <div class="box" style="width: 255px;height: 355px;">
@@ -653,6 +729,9 @@ if (isset($_POST['buy_now'])) {
                             <div style="font-weight: 500; font-size:18px; text-align: center; " class="Title"> <?php echo $fetch_book['Title']; ?></div>
                         </div>
                         <div class="Price">Price: ₹ <?php echo $fetch_book['Price']; ?>/-</div>
+                        <?php if ($user_details) { ?>
+                            <div class="AddedBy">Added By: <?php echo $user_details['name'] . ' ' . $user_details['surname'] . ' (' . $user_details['user_type'] . ')'; ?></div>
+                        <?php } ?>
                         <!-- <button name="add_cart"><img src="./images/cart2.png" alt=""></button> -->
                         <form action="" method="POST">
                             <input class="hidden_input" type="hidden" name="book_name" value="<?php echo $fetch_book['Title'] ?>">
@@ -696,6 +775,9 @@ if (isset($_POST['buy_now'])) {
             $select_book = mysqli_query($conn, "SELECT * FROM `book_info` where category_name='Non-fiction'") or die('query failed');
             if (mysqli_num_rows($select_book) > 0) {
                 while ($fetch_book = mysqli_fetch_assoc($select_book)) {
+                    $added_by = $fetch_book['added_by'];
+                    $select_user = mysqli_query($conn, "SELECT `name`, `surname`, `user_type` FROM `users_info` WHERE `Id` = '$added_by'");
+                    $user_details = mysqli_fetch_assoc($select_user);
             ?>
 
                     <div class="box" style="width: 255px;height: 355px;">
@@ -706,6 +788,9 @@ if (isset($_POST['buy_now'])) {
                             <div style="font-weight: 500; font-size:18px; text-align: center; " class="Title"> <?php echo $fetch_book['Title']; ?></div>
                         </div>
                         <div class="Price">Price: ₹ <?php echo $fetch_book['Price']; ?>/-</div>
+                        <?php if ($user_details) { ?>
+                            <div class="AddedBy">Added By: <?php echo $user_details['name'] . ' ' . $user_details['surname'] . ' (' . $user_details['user_type'] . ')'; ?></div>
+                        <?php } ?>
                         <!-- <button name="add_cart"><img src="./images/cart2.png" alt=""></button> -->
                         <form action="" method="POST">
                             <input class="hidden_input" type="hidden" name="book_name" value="<?php echo $fetch_book['Title'] ?>">
@@ -748,6 +833,9 @@ if (isset($_POST['buy_now'])) {
             $select_book = mysqli_query($conn, "SELECT * FROM `book_info` where category_name='Fiction'") or die('query failed');
             if (mysqli_num_rows($select_book) > 0) {
                 while ($fetch_book = mysqli_fetch_assoc($select_book)) {
+                    $added_by = $fetch_book['added_by'];
+                    $select_user = mysqli_query($conn, "SELECT `name`, `surname`, `user_type` FROM `users_info` WHERE `Id` = '$added_by'");
+                    $user_details = mysqli_fetch_assoc($select_user);
             ?>
 
                     <div class="box" style="width: 255px;height: 355px;">
@@ -758,6 +846,9 @@ if (isset($_POST['buy_now'])) {
                             <div style="font-weight: 500; font-size:18px; text-align: center; " class="Title"> <?php echo $fetch_book['Title']; ?></div>
                         </div>
                         <div class="Price">Price: ₹ <?php echo $fetch_book['Price']; ?>/-</div>
+                        <?php if ($user_details) { ?>
+                            <div class="AddedBy">Added By: <?php echo $user_details['name'] . ' ' . $user_details['surname'] . ' (' . $user_details['user_type'] . ')'; ?></div>
+                        <?php } ?>
                         <!-- <button name="add_cart"><img src="./images/cart2.png" alt=""></button> -->
                         <form action="" method="POST">
                             <input class="hidden_input" type="hidden" name="book_name" value="<?php echo $fetch_book['Title'] ?>">
@@ -799,6 +890,9 @@ if (isset($_POST['buy_now'])) {
             $select_book = mysqli_query($conn, "SELECT * FROM `book_info` where category_name='upto 10th'") or die('query failed');
             if (mysqli_num_rows($select_book) > 0) {
                 while ($fetch_book = mysqli_fetch_assoc($select_book)) {
+                    $added_by = $fetch_book['added_by'];
+                    $select_user = mysqli_query($conn, "SELECT `name`, `surname`, `user_type` FROM `users_info` WHERE `Id` = '$added_by'");
+                    $user_details = mysqli_fetch_assoc($select_user);
             ?>
 
                     <div class="box" style="width: 255px;height: 355px;">
@@ -809,6 +903,9 @@ if (isset($_POST['buy_now'])) {
                             <div style="font-weight: 500; font-size:18px; text-align: center; " class="Title"> <?php echo $fetch_book['Title']; ?></div>
                         </div>
                         <div class="Price">Price: ₹ <?php echo $fetch_book['Price']; ?>/-</div>
+                        <?php if ($user_details) { ?>
+                            <div class="AddedBy">Added By: <?php echo $user_details['name'] . ' ' . $user_details['surname'] . ' (' . $user_details['user_type'] . ')'; ?></div>
+                        <?php } ?>
                         <!-- <button name="add_cart"><img src="./images/cart2.png" alt=""></button> -->
                         <form action="" method="POST">
                             <input class="hidden_input" type="hidden" name="book_name" value="<?php echo $fetch_book['Title'] ?>">
@@ -851,6 +948,9 @@ if (isset($_POST['buy_now'])) {
             $select_book = mysqli_query($conn, "SELECT * FROM `book_info` where category_name='GATE'") or die('query failed');
             if (mysqli_num_rows($select_book) > 0) {
                 while ($fetch_book = mysqli_fetch_assoc($select_book)) {
+                    $added_by = $fetch_book['added_by'];
+                    $select_user = mysqli_query($conn, "SELECT `name`, `surname`, `user_type` FROM `users_info` WHERE `Id` = '$added_by'");
+                    $user_details = mysqli_fetch_assoc($select_user);
             ?>
 
                     <div class="box" style="width: 255px;height: 355px;">
@@ -861,6 +961,9 @@ if (isset($_POST['buy_now'])) {
                             <div style="font-weight: 500; font-size:18px; text-align: center; " class="Title"> <?php echo $fetch_book['Title']; ?></div>
                         </div>
                         <div class="Price">Price: ₹ <?php echo $fetch_book['Price']; ?>/-</div>
+                        <?php if ($user_details) { ?>
+                            <div class="AddedBy">Added By: <?php echo $user_details['name'] . ' ' . $user_details['surname'] . ' (' . $user_details['user_type'] . ')'; ?></div>
+                        <?php } ?>
                         <!-- <button name="add_cart"><img src="./images/cart2.png" alt=""></button> -->
                         <form action="" method="POST">
                             <input class="hidden_input" type="hidden" name="book_name" value="<?php echo $fetch_book['Title'] ?>">
@@ -903,6 +1006,9 @@ if (isset($_POST['buy_now'])) {
             $select_book = mysqli_query($conn, "SELECT * FROM `book_info` where category_name='CAT'") or die('query failed');
             if (mysqli_num_rows($select_book) > 0) {
                 while ($fetch_book = mysqli_fetch_assoc($select_book)) {
+                    $added_by = $fetch_book['added_by'];
+                    $select_user = mysqli_query($conn, "SELECT `name`, `surname`, `user_type` FROM `users_info` WHERE `Id` = '$added_by'");
+                    $user_details = mysqli_fetch_assoc($select_user);
             ?>
 
                     <div class="box" style="width: 255px;height: 355px;">
@@ -913,6 +1019,9 @@ if (isset($_POST['buy_now'])) {
                             <div style="font-weight: 500; font-size:18px; text-align: center; " class="Title"> <?php echo $fetch_book['Title']; ?></div>
                         </div>
                         <div class="Price">Price: ₹ <?php echo $fetch_book['Price']; ?>/-</div>
+                        <?php if ($user_details) { ?>
+                            <div class="AddedBy">Added By: <?php echo $user_details['name'] . ' ' . $user_details['surname'] . ' (' . $user_details['user_type'] . ')'; ?></div>
+                        <?php } ?>
                         <!-- <button name="add_cart"><img src="./images/cart2.png" alt=""></button> -->
                         <form action="" method="POST">
                             <input class="hidden_input" type="hidden" name="book_name" value="<?php echo $fetch_book['Title'] ?>">
@@ -954,6 +1063,9 @@ if (isset($_POST['buy_now'])) {
             $select_book = mysqli_query($conn, "SELECT * FROM `book_info` where category_name='CET'") or die('query failed');
             if (mysqli_num_rows($select_book) > 0) {
                 while ($fetch_book = mysqli_fetch_assoc($select_book)) {
+                    $added_by = $fetch_book['added_by'];
+                    $select_user = mysqli_query($conn, "SELECT `name`, `surname`, `user_type` FROM `users_info` WHERE `Id` = '$added_by'");
+                    $user_details = mysqli_fetch_assoc($select_user);
             ?>
 
                     <div class="box" style="width: 255px;height: 355px;">
@@ -964,6 +1076,9 @@ if (isset($_POST['buy_now'])) {
                             <div style="font-weight: 500; font-size:18px; text-align: center; " class="Title"> <?php echo $fetch_book['Title']; ?></div>
                         </div>
                         <div class="Price">Price: ₹ <?php echo $fetch_book['Price']; ?>/-</div>
+                        <?php if ($user_details) { ?>
+                            <div class="AddedBy">Added By: <?php echo $user_details['name'] . ' ' . $user_details['surname'] . ' (' . $user_details['user_type'] . ')'; ?></div>
+                        <?php } ?>
                         <!-- <button name="add_cart"><img src="./images/cart2.png" alt=""></button> -->
                         <form action="" method="POST">
                             <input class="hidden_input" type="hidden" name="book_name" value="<?php echo $fetch_book['Title'] ?>">
@@ -1007,6 +1122,9 @@ if (isset($_POST['buy_now'])) {
             $select_book = mysqli_query($conn, "SELECT * FROM `book_info` where category_name='NEET'") or die('query failed');
             if (mysqli_num_rows($select_book) > 0) {
                 while ($fetch_book = mysqli_fetch_assoc($select_book)) {
+                    $added_by = $fetch_book['added_by'];
+                    $select_user = mysqli_query($conn, "SELECT `name`, `surname`, `user_type` FROM `users_info` WHERE `Id` = '$added_by'");
+                    $user_details = mysqli_fetch_assoc($select_user);
             ?>
 
                     <div class="box" style="width: 255px;height: 355px;">
@@ -1017,6 +1135,9 @@ if (isset($_POST['buy_now'])) {
                             <div style="font-weight: 500; font-size:18px; text-align: center; " class="Title"> <?php echo $fetch_book['Title']; ?></div>
                         </div>
                         <div class="Price">Price: ₹ <?php echo $fetch_book['Price']; ?>/-</div>
+                        <?php if ($user_details) { ?>
+                            <div class="AddedBy">Added By: <?php echo $user_details['name'] . ' ' . $user_details['surname'] . ' (' . $user_details['user_type'] . ')'; ?></div>
+                        <?php } ?>
                         <!-- <button name="add_cart"><img src="./images/cart2.png" alt=""></button> -->
                         <form action="" method="POST">
                             <input class="hidden_input" type="hidden" name="book_name" value="<?php echo $fetch_book['Title'] ?>">
@@ -1059,6 +1180,9 @@ if (isset($_POST['buy_now'])) {
             $select_book = mysqli_query($conn, "SELECT * FROM `book_info` where category_name='JEE'") or die('query failed');
             if (mysqli_num_rows($select_book) > 0) {
                 while ($fetch_book = mysqli_fetch_assoc($select_book)) {
+                    $added_by = $fetch_book['added_by'];
+                    $select_user = mysqli_query($conn, "SELECT `name`, `surname`, `user_type` FROM `users_info` WHERE `Id` = '$added_by'");
+                    $user_details = mysqli_fetch_assoc($select_user);
             ?>
 
                     <div class="box" style="width: 255px;height: 355px;">
@@ -1069,6 +1193,9 @@ if (isset($_POST['buy_now'])) {
                             <div style="font-weight: 500; font-size:18px; text-align: center; " class="Title"> <?php echo $fetch_book['Title']; ?></div>
                         </div>
                         <div class="Price">Price: ₹ <?php echo $fetch_book['Price']; ?>/-</div>
+                        <?php if ($user_details) { ?>
+                            <div class="AddedBy">Added By: <?php echo $user_details['name'] . ' ' . $user_details['surname'] . ' (' . $user_details['user_type'] . ')'; ?></div>
+                        <?php } ?>
                         <!-- <button name="add_cart"><img src="./images/cart2.png" alt=""></button> -->
                         <form action="" method="POST">
                             <input class="hidden_input" type="hidden" name="book_name" value="<?php echo $fetch_book['Title'] ?>">
@@ -1111,6 +1238,9 @@ if (isset($_POST['buy_now'])) {
             $select_book = mysqli_query($conn, "SELECT * FROM `book_info` where category_name='HSC'") or die('query failed');
             if (mysqli_num_rows($select_book) > 0) {
                 while ($fetch_book = mysqli_fetch_assoc($select_book)) {
+                    $added_by = $fetch_book['added_by'];
+                    $select_user = mysqli_query($conn, "SELECT `name`, `surname`, `user_type` FROM `users_info` WHERE `Id` = '$added_by'");
+                    $user_details = mysqli_fetch_assoc($select_user);
             ?>
 
                     <div class="box" style="width: 255px;height: 355px;">
@@ -1121,6 +1251,9 @@ if (isset($_POST['buy_now'])) {
                             <div style="font-weight: 500; font-size:18px; text-align: center; " class="Title"> <?php echo $fetch_book['Title']; ?></div>
                         </div>
                         <div class="Price">Price: ₹ <?php echo $fetch_book['Price']; ?>/-</div>
+                        <?php if ($user_details) { ?>
+                            <div class="AddedBy">Added By: <?php echo $user_details['name'] . ' ' . $user_details['surname'] . ' (' . $user_details['user_type'] . ')'; ?></div>
+                        <?php } ?>
                         <!-- <button name="add_cart"><img src="./images/cart2.png" alt=""></button> -->
                         <form action="" method="POST">
                             <input class="hidden_input" type="hidden" name="book_name" value="<?php echo $fetch_book['Title'] ?>">
@@ -1162,6 +1295,9 @@ if (isset($_POST['buy_now'])) {
             $select_book = mysqli_query($conn, "SELECT * FROM `book_info` where category_name='SSC'") or die('query failed');
             if (mysqli_num_rows($select_book) > 0) {
                 while ($fetch_book = mysqli_fetch_assoc($select_book)) {
+                    $added_by = $fetch_book['added_by'];
+                    $select_user = mysqli_query($conn, "SELECT `name`, `surname`, `user_type` FROM `users_info` WHERE `Id` = '$added_by'");
+                    $user_details = mysqli_fetch_assoc($select_user);
             ?>
 
                     <div class="box" style="width: 255px;height: 355px;">
@@ -1172,6 +1308,9 @@ if (isset($_POST['buy_now'])) {
                             <div style="font-weight: 500; font-size:18px; text-align: center; " class="Title"> <?php echo $fetch_book['Title']; ?></div>
                         </div>
                         <div class="Price">Price: ₹ <?php echo $fetch_book['Price']; ?>/-</div>
+                        <?php if ($user_details) { ?>
+                            <div class="AddedBy">Added By: <?php echo $user_details['name'] . ' ' . $user_details['surname'] . ' (' . $user_details['user_type'] . ')'; ?></div>
+                        <?php } ?>
                         <!-- <button name="add_cart"><img src="./images/cart2.png" alt=""></button> -->
                         <form action="" method="POST">
                             <input class="hidden_input" type="hidden" name="book_name" value="<?php echo $fetch_book['Title'] ?>">

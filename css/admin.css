@@ -17,6 +17,7 @@ header {
   top: 0;
   left: 0;
   right: 0;
+  font-size: 25px;
   padding: 10px 1%;
   align-items: center;
   position: sticky;
@@ -35,7 +36,7 @@ header {
   color: rgb(255, 5, 5);
   font-weight: bold;
   padding-right: 5px;
-  font-size: 40px;
+  font-size: 30px;
 }
 .logo a .me {
   color: black;
@@ -60,7 +61,7 @@ header .right .Btn {
   color: rgb(15, 155, 248);
   margin: 0 15px;
   padding: 5px 3px;
-  font-size: 25px;
+  font-size: 20px;
   font-weight: 600;
   transition: 0.2s ease;
 }

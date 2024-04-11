@@ -37,7 +37,7 @@ if (isset($_POST['add_books'])) {
     } else {
         // Insert record
         $add_book = mysqli_query($conn, "INSERT INTO book_info (`title`, `author`, `location`, `language`, `dimensions`, `Review`, `Edition`, `Publication`, `Pages`, `Price`, `category_name`, `image`) 
-            VALUES ('$btitle', '$bauthor', '$blocation', '$blanguage', '$bdimensions', '$bdesc', '$bedition', '$bpublication', '$bpages', '$price', '$category', '$img')");
+            VALUES ('$btitle', '$bauthor', '$blocation', '$blanguage', '$bdimensions', '$bdesc', '$bedition', '$bpublication', '$bpages', '$price', '$category', '$img' )");
 
         if ($add_book) {
             move_uploaded_file($img_temp_name, $img_file);

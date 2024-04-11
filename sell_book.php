@@ -54,8 +54,8 @@ if (isset($_POST['sell_book'])) {
 
         if (move_uploaded_file($image_tmp_name, $image_folder)) {
             // Image uploaded successfully
-            $insert_query = "INSERT INTO book_info (Title, Author, Location, Language, Dimensions, Review, Edition, Publication, Pages, Price, category_name, Image) 
-                            VALUES ('$title', '$author', '$location', '$language', '$dimensions', '$review', '$edition', '$publication', $pages, $price, '$category', '$image')";
+            $insert_query = "INSERT INTO book_info (Title, Author, Location, Language, Dimensions, Review, Edition, Publication, Pages, Price, category_name, Image, added_by) 
+                            VALUES ('$title', '$author', '$location', '$language', '$dimensions', '$review', '$edition', '$publication', $pages, $price, '$category', '$image', '$user_id')";
 
             if (mysqli_query($conn, $insert_query)) {
                 $message = 'Book added successfully';

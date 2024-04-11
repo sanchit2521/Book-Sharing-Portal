@@ -26,6 +26,7 @@
             <a href="admin_orders.php">Orders</a>
             <a href="message_admin.php">Message</a>
             <a href="users_detail.php">Users</a>
+            <a href="add_ebook.php">Add E-books</a>
 
         </div>
         <div class="right">
