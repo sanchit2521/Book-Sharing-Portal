@@ -78,6 +78,11 @@ if (isset($_GET['details'])) {
                     <h3>Title: <?php echo $fetch_book['Title']; ?></h3>
                     <p>Author: <?php echo $fetch_book['Author']; ?></p>
                     <p>Description: <?php echo $fetch_book['Review']; ?></p>
+                    <p>Language: <?php echo $fetch_book['Language']; ?></p>
+                    <p>Dimensions: <?php echo $fetch_book['Dimensions']; ?></p>
+                    <p>Edition: <?php echo $fetch_book['Edition']; ?></p>
+                    <p>Publication: <?php echo $fetch_book['Publication']; ?></p>
+                    <p>Pages: <?php echo $fetch_book['Pages']; ?></p>
                     <p>Price: ₹ <?php echo $fetch_book['Price']; ?>/-</p>
                 </div>
             </div>

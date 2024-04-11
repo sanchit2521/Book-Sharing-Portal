@@ -239,7 +239,7 @@ if (isset($_POST['buy_now'])) {
                                                             echo '-name=', $fetch_book['name']; ?>"> <img style="height: 200px;width: 125px;margin: auto;" class="books_images" src="added_books/<?php echo $fetch_book['image']; ?>" alt=""></a>
                         <div style="text-align:left ;">
 
-                            <div style="font-weight: 500; font-size:18px; text-align: center;" class="name"> <?php echo $fetch_book['name']; ?></div>
+                            <div style="font-weight: 500; font-size:18px; text-align: center;" class="Title"> <?php echo $fetch_book['Title']; ?></div>
                         </div>
                         <div class="Price">Price: ₹ <?php echo $fetch_book['Price']; ?>/-</div>
                         <!-- <button name="add_cart"><img src="./images/cart2.png" alt=""></button> -->
@@ -285,7 +285,7 @@ if (isset($_POST['buy_now'])) {
                                                             echo '-name=', $fetch_book['name']; ?>"> <img style="height: 200px;width: 125px;margin: auto;" class="books_images" src="added_books/<?php echo $fetch_book['image']; ?>" alt=""></a>
                         <div style="text-align:left ;">
 
-                            <div style="font-weight: 500; font-size:18px; text-align: center;" class="name"> <?php echo $fetch_book['name']; ?></div>
+                            <div style="font-weight: 500; font-size:18px; text-align: center;" class="Title"> <?php echo $fetch_book['Title']; ?></div>
                         </div>
                         <div class="Price">Price: ₹ <?php echo $fetch_book['Price']; ?>/-</div>
                         <!-- <button name="add_cart"><img src="./images/cart2.png" alt=""></button> -->
