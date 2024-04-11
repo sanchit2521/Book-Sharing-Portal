@@ -1,25 +1,26 @@
 <?php
 include 'config.php';
 
+error_reporting(0);
 session_start();
 
 $user_id = $_SESSION['user_id'];
-$user_name = $_SESSION['user_name'];
 
-if (!isset($user_id)) {
-    header('location:login.php');
-}
+
+
 
 if (isset($_POST['buy_now'])) {
     $book_id = $_POST['book_id'];
     $book_name = $_POST['book_name'];
     $book_image = $_POST['book_image'];
+    $added_by = $_POST['added_by']; // Assuming 'added_by' is sent along with other book details
 
-    // Fetch price from book_info table based on book_id
-    $book_info_query = $conn->query("SELECT Price FROM book_info WHERE book_id = '$book_id'");
+    // Fetch price and added_by from book_info table based on book_id
+    $book_info_query = $conn->query("SELECT Price, added_by FROM book_info WHERE book_id = '$book_id'");
     if ($book_info_query->num_rows > 0) {
         $book_info = $book_info_query->fetch_assoc();
         $book_price = $book_info['Price'];
+        $added_by = $book_info['added_by']; // Update $added_by with the value from the database
 
         // Check if the book already exists in the cart
         $select_book = $conn->query("SELECT * FROM cart WHERE book_id = '$book_id' AND user_id = '$user_id'");
@@ -32,19 +33,22 @@ if (isset($_POST['buy_now'])) {
             // If the book is not in the cart, add it with quantity = 1
             $book_quantity = 1;
             $total_price = $book_price * $book_quantity;
-            $insert_query = "INSERT INTO cart (`user_id`, `book_id`, `name`, `price`, `image`, `quantity`, `total`) 
-                            VALUES ('$user_id', '$book_id', '$book_name', '$book_price', '$book_image', '$book_quantity', '$total_price')";
+            // Add 'added_by' column to cart table and include it in the insert query
+            $insert_query = "INSERT INTO cart (`user_id`, `book_id`, `name`, `price`, `image`, `quantity`, `total`, `added_by`) 
+                            VALUES ('$user_id', '$book_id', '$book_name', '$book_price', '$book_image', '$book_quantity', '$total_price', '$added_by')";
             $conn->query($insert_query) or die('Add to cart query failed');
             $message[] = 'Book added to cart successfully';
         }
     } else {
-        $message[] = 'Failed to add book to cart. Book price not found.';
+        $message[] = 'Failed to add book to cart. Book price or added_by information not found.';
     }
 
     // Redirect to the cart page after adding the book to the cart
     header('Location: cart.php');
     exit;
 }
+
+
 ?>
 
 <!DOCTYPE html>

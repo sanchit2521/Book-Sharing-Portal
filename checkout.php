@@ -1,101 +1,137 @@
-<?php include 'config.php';
-
+<?php
 session_start();
+include 'config.php';
+require 'vendor/autoload.php'; // Include PHPMailer autoload.php file
+
+use PHPMailer\PHPMailer\PHPMailer;
+use PHPMailer\PHPMailer\Exception;
+use PHPMailer\PHPMailer\SMTP; // Add this line to import the SMTP class
 
 $user_id = $_SESSION['user_id'];
+$conn_oid = ""; // Initialize $conn_oid variable
 
 if (!isset($user_id)) {
-  header('location:login.php');
+    header('location:login.php');
+    exit();
 }
 
 if (isset($_POST['checkout'])) {
+    $name = mysqli_real_escape_string($conn, $_POST['firstname']);
+    $number = $_POST['number'];
+    $email = mysqli_real_escape_string($conn, $_POST['email']);
+    $method = mysqli_real_escape_string($conn, $_POST['method']);
+    $address = mysqli_real_escape_string($conn, $_POST['address']);
+    $city = mysqli_real_escape_string($conn, $_POST['city']);
+    $state = mysqli_real_escape_string($conn, $_POST['state']);
+    $country = mysqli_real_escape_string($conn, $_POST['country']);
+    $pincode = mysqli_real_escape_string($conn, $_POST['pincode']);
+    $full_address = mysqli_real_escape_string($conn, $_POST['address'] . ', ' . $_POST['city'] . ', ' . $_POST['state'] . ', ' . $_POST['country'] . ' - ' . $_POST['pincode']);
+    $placed_on = date('d-M-Y');
 
-  $name = mysqli_real_escape_string($conn, $_POST['firstname']);
-  $number = $_POST['number'];
-  $email = mysqli_real_escape_string($conn, $_POST['email']);
-  $method = mysqli_real_escape_string($conn, $_POST['method']);
-  $address = mysqli_real_escape_string($conn, $_POST['address']);
-  $city = mysqli_real_escape_string($conn, $_POST['city']);
-  $state = mysqli_real_escape_string($conn, $_POST['state']);
-  $country = mysqli_real_escape_string($conn, $_POST['country']);
-  $pincode = mysqli_real_escape_string($conn, $_POST['pincode']);
-  $full_address = mysqli_real_escape_string($conn, $_POST['address'] . ', ' . $_POST['city'] . ', ' . $_POST['state'] . ', ' . $_POST['country'] . ' - ' . $_POST['pincode']);
-  $placed_on = date('d-M-Y');
+    $cart_total = 0;
+    $cart_products = array();
+    $added_by = ""; // Initialize added_by variable
 
-  $cart_total = 0;
-  $cart_products[] = '';
-  if (empty($name)) {
-    $message[] = 'Please Enter Your Name';
-  } elseif (empty($email)) {
-    $message[] = 'Please Enter Email Id';
-  } elseif (empty($number)) {
-    $message[] = 'Please Enter Mobile Number';
-  } elseif (empty($address)) {
-    $message[] = 'Please Enter Address';
-  } elseif (empty($city)) {
-    $message[] = 'Please Enter city';
-  } elseif (empty($state)) {
-    $message[] = 'Please Enter state';
-  } elseif (empty($country)) {
-    $message[] = 'Please Enter country';
-  } elseif (empty($pincode)) {
-    $message[] = 'Please Enter your area pincode';
-  } else {
-
-    $cart_query = mysqli_query($conn, "SELECT * FROM `cart` WHERE user_id = '$user_id'") or die('query failed');
-    if (mysqli_num_rows($cart_query) > 0) {
-      while ($cart_item = mysqli_fetch_assoc($cart_query)) {
-        $cart_products[] = $cart_item['name'] . ' #' . $cart_item['book_id'] . ',(' . $cart_item['quantity'] . ') ';
-        $quantity=$cart_item['quantity'];
-        $unit_price=$cart_item['price'];
-        $cart_books = $cart_item['name'];
-        $sub_total = ($cart_item['price'] * $cart_item['quantity']);
-        $cart_total += $sub_total;
-      
-      }
-    }
-  
-
-  $total_books = implode(' ', $cart_products);
-
-  $order_query = mysqli_query($conn, "SELECT * FROM `confirm_order` WHERE name = '$name' AND number = '$number' AND email = '$email' AND payment_method = '$method' AND address = '$address' AND total_books = '$total_books' AND total_price = '$cart_total'") or die('query failed');
-
-
-    if (mysqli_num_rows($order_query) > 0) {
-      $message[] = 'order already placed!';
-    } 
-    else {
-      mysqli_query($conn, "INSERT INTO `confirm_order`(user_id, name, number, email, payment_method, address,total_books, total_price, order_date) VALUES('$user_id','$name', '$number', '$email','$method', '$full_address', '$total_books', '$cart_total', '$placed_on')") or die('query failed');
-
-      $conn_oid= $conn->insert_id;
-      $_SESSION['id'] = $conn_oid;
-      // $select_book = mysqli_query($conn, "SELECT * FROM `confirm_order`") or die('query failed');
-      //   if(mysqli_num_rows($select_book) > 0){
-      //     $fetch_book = mysqli_fetch_assoc($select_book);
-      //     $orders_id= $fetch_book['order_id'];
-      //   }
-
-        $cart_query = mysqli_query($conn, "SELECT * FROM `cart` WHERE user_id = '$user_id'") or die('query failed');
+    // Check if the form fields are empty
+    if (empty($name) || empty($email) || empty($number) || empty($address) || empty($city) || empty($state) || empty($country) || empty($pincode)) {
+        $message[] = 'Please fill all the required fields.';
+    } else {
+        // Fetch cart items for the user
+        $cart_query = mysqli_query($conn, "SELECT * FROM `cart` WHERE user_id = '$user_id'") or die('Query failed');
         if (mysqli_num_rows($cart_query) > 0) {
-          while ($cart_item = mysqli_fetch_assoc($cart_query)) {
-            $cart_products[] = $cart_item['name'] . ' #' . $cart_item['book_id'] . ',(' . $cart_item['quantity'] . ') ';
-            $quantity=$cart_item['quantity'];
-            $unit_price=$cart_item['price'];
-            $cart_books = $cart_item['name'];
-            $sub_total = ($cart_item['price'] * $cart_item['quantity']);
-            $cart_total += $sub_total;
-          
-            mysqli_query($conn, "INSERT INTO `orders`(user_id,id,address,city,state,country,pincode,book,quantity,unit_price,sub_total) VALUES('$user_id','$conn_oid','$address','$city','$state','$country','$pincode','$cart_books','$quantity','$unit_price','$sub_total')") or die('query failed');
-          }
+            while ($cart_item = mysqli_fetch_assoc($cart_query)) {
+                // Get cart item details
+                $cart_products[] = $cart_item['name'] . ' #' . $cart_item['book_id'] . ',(' . $cart_item['quantity'] . ') ';
+                $quantity = $cart_item['quantity'];
+                $unit_price = $cart_item['price'];
+                $cart_books = $cart_item['name'];
+                $sub_total = ($cart_item['price'] * $cart_item['quantity']);
+                $cart_total += $sub_total;
+                // Get added_by value
+                $added_by = $cart_item['added_by'];
+
+                // Insert order details into orders table
+                mysqli_query($conn, "INSERT INTO `orders`(user_id,id,address,city,state,country,pincode,book,quantity,unit_price,sub_total, added_by) VALUES('$user_id','$conn_oid','$address','$city','$state','$country','$pincode','$cart_books','$quantity','$unit_price','$sub_total', '$added_by')") or die('Query failed');
+            }
         }
 
-      $message[] = 'order placed successfully!';
-      mysqli_query($conn, "DELETE FROM `cart` WHERE user_id = '$user_id'") or die('query failed');
-    }
-  }
-}
+        // Get total books
+        $total_books = implode(' ', $cart_products);
 
+        // Check if the order already exists
+        $order_query = mysqli_query($conn, "SELECT * FROM `confirm_order` WHERE name = '$name' AND number = '$number' AND email = '$email' AND payment_method = '$method' AND address = '$address' AND total_books = '$total_books' AND total_price = '$cart_total'") or die('Query failed');
+        if (mysqli_num_rows($order_query) > 0) {
+            $message[] = 'Order already placed!';
+        } else {
+            // Insert order details into confirm_order table
+            $result = mysqli_query($conn, "INSERT INTO `confirm_order`(user_id, name, number, email, payment_method, address,total_books, total_price, order_date, added_by) VALUES('$user_id','$name', '$number', '$email','$method', '$full_address', '$total_books', '$cart_total', '$placed_on', '$added_by')") or die('Query failed');
+
+            // Retrieve the last inserted ID
+            $conn_oid = $conn->insert_id;
+
+            $_SESSION['id'] = $conn_oid; // Store the ID in the session if needed
+
+            // Insert order details into orders table
+            foreach ($cart_products as $cart_book) {
+                mysqli_query($conn, "INSERT INTO `orders`(user_id,id,address,city,state,country,pincode,book,quantity,unit_price,sub_total, added_by) VALUES('$user_id','$conn_oid','$address','$city','$state','$country','$pincode','$cart_book','$quantity','$unit_price','$sub_total', '$added_by')") or die('Query failed');
+            }
+
+            // Success message
+            $message[] = 'Order placed successfully!';
+            // Clear cart items
+            mysqli_query($conn, "DELETE FROM `cart` WHERE user_id = '$user_id'") or die('Query failed');
+        }
+    }
+
+    // Send email to user who added the book
+    if (isset($added_by)) {
+        // Retrieve email of the user who added the book
+        $added_by_email_query = mysqli_query($conn, "SELECT email FROM users_info WHERE Id = '$added_by'");
+        if ($added_by_email_query && mysqli_num_rows($added_by_email_query) > 0) {
+            $added_by_email_row = mysqli_fetch_assoc($added_by_email_query);
+            $added_by_email = $added_by_email_row['email'];
+
+            // Initialize PHPMailer
+            $mail = new PHPMailer(true);
+
+            try {
+                // Server settings
+                $mail->isSMTP();
+                $mail->Host = 'smtp.office365.com';
+                $mail->SMTPAuth = true;
+                $mail->Username = 'khemnarst21.comp@coeptech.ac.in'; // Your email address
+                $mail->Password = 'Sainath@1234'; // Your email password
+                $mail->SMTPSecure = 'tls';
+                $mail->Port = 587;
+
+                // Recipient
+                $mail->setFrom('khemnarst21.comp@coeptech.ac.in', 'Book Sharing Portal');
+                $mail->addAddress($added_by_email); // Add a recipient
+
+                // Content
+                $mail->isHTML(true);
+                $mail->Subject = 'Your Book Sale Confirmation';
+                $mail->Body    = 'Dear User,<br><br>Your book has been sold on the website successfully.<br><br>Thank you for using our platform.<br><br>Regards,<br>Book Sharing Portal';
+
+                $mail->send();
+                echo 'Email has been sent successfully';
+            } catch (Exception $e) {
+                echo "Message could not be sent. Mailer Error: {$mail->ErrorInfo}";
+            }
+        }
+    }
+}
 ?>
+
+
+
+
+
+
+
+
+
+
 
 
 

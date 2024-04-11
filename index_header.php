@@ -115,8 +115,8 @@ font-weight: 600;
             </div>
         </div>
         <!-- <a href="contact-us.php">Contact US</a> -->
-        <a href="<?php echo $messages_link; ?>">Messages</a>
         <a href="show_ebook.php">E-BOOKS</a>
+        <a href="<?php echo isset($_SESSION['user_id']) ? 'rent_book.php' : 'login.php'; ?>">Rent a Book</a>
         <a href="<?php echo isset($_SESSION['user_id']) ? 'sell_book.php' : 'login.php'; ?>">Sell a book</a>
         <a href="<?php echo isset($_SESSION['user_id']) ? 'donate_book.php' : 'login.php'; ?>">Donate a book</a>
     </div>
@@ -187,8 +187,8 @@ font-weight: 600;
       <p>Order history</p>
       <span>></span>
     </a>
-    <a href="bid.php" class="sub-menu-link">
-      <p>Auction a book</p>
+    <a href="show_rent.php" class="sub-menu-link">
+      <p>books on rent</p>
       <span>></span>
     </a>
     <a href="logout.php" class="sub-menu-link">

@@ -43,7 +43,52 @@ if (isset($_POST['update'])) {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Cart</title>
     <style>
-        /* Styles */
+        .cart-btn1,.cart-btn2{
+            
+            display: inline-block;
+            margin: auto;
+            padding:0.8rem 1.2rem;
+            cursor: pointer;
+            color:white;
+            font-size: 15px;
+            border-radius: .5rem;
+            text-transform: capitalize;
+                    }
+                    .cart-btn1{
+                        margin-left: 40%;
+                        background-color: #ffa41c;
+                        color: black;
+                    }
+                    .cart-btn2{
+                        background-color: rgb(0, 167, 245);
+                        color: black;
+                    }
+                    .message {
+            position: sticky;
+            top: 0;
+            margin: 0 auto;
+            width: 61%;
+            background-color: #fff;
+            padding: 6px 9px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            z-index: 100;
+            gap: 0px;
+            border: 2px solid rgb(68, 203, 236);
+            border-top-right-radius: 8px;
+            border-bottom-left-radius: 8px;
+            }
+            .message span {
+            font-size: 22px;
+            color: rgb(240, 18, 18);
+            font-weight: 400;
+            }
+            .message i {
+            cursor: pointer;
+            color: rgb(3, 227, 235);
+            font-size: 15px;
+            }
     </style>
 </head>
 
