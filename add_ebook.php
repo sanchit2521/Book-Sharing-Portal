@@ -147,7 +147,7 @@ if (isset($_POST['add_ebook'])) {
     }
     ?>
 
-    <a class="update_btn" style="position: fixed; z-index:100;" href="total_ebooks.php">See All E-books</a>
+    <a class="update_btn" style="position: fixed; z-index:100;" href="show_ebook.php">See All E-books</a>
     <div class="container_box">
         <form action="" method="POST" enctype="multipart/form-data">
             <h3>Add E-books To <a href="index.php"><span>Book Sharing Portal </span></a></h3>

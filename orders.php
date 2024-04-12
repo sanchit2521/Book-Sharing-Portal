@@ -89,7 +89,6 @@ if(!isset($user_id)){
          <p> Payment Method : <span><?php echo $fetch_book['payment_method']; ?></span> </p>
          <p> Your orders : <span><?php echo $fetch_book['total_books']; ?></span> </p>
          <p> Total price : <span>₹ <?php echo $fetch_book['total_price']; ?>/-</span> </p>
-         <p> Payment status : <span style="color:<?php if($fetch_book['payment_status'] == 'pending'){ echo 'orange'; }else{ echo 'green'; } ?>;"><?php echo $fetch_book['payment_status']; ?></span> </p>
          <p><a href="invoice.php?order_id=<?php echo $fetch_book['order_id']; ?>" target="_blank">Print Recipt</a></p>
          </div>
          <!-- <form action="" method="POST">

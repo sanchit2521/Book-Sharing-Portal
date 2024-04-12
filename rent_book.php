@@ -47,7 +47,7 @@ if (isset($_POST['rent_book'])) {
     } else {
         if (move_uploaded_file($image_tmp_name, $image_folder)) {
             // Image uploaded successfully
-            $insert_query = "INSERT INTO rented_books (title, author, image, rent_amount, duration_days, location, description, rented_by) 
+            $insert_query = "INSERT INTO rented_book (title, author, image, rent_amount, duration_days, location, description, rented_by) 
                             VALUES ('$title', '$author', '$image', $rent_amount, $duration_days, '$location', '$description', '$user_id')";
 
             if (mysqli_query($conn, $insert_query)) {

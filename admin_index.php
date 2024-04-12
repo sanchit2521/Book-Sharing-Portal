@@ -39,52 +39,7 @@ $msgcount = mysqli_num_rows( $msg_no );
     <?php include'admin_header.php';?>
     <br/>
     
-    <div class="main_box">
-      <div class="card" style="width: 15rem">
-      <?php
-            $total_pendings = 0;
-            $select_pending = mysqli_query($conn, "SELECT total_price FROM `confirm_order` WHERE payment_status = 'pending'") or die('query failed');
-            if(mysqli_num_rows($select_pending) > 0){
-               while($fetch_pendings = mysqli_fetch_assoc($select_pending)){
-                  $total_price = $fetch_pendings['total_price'];
-                  $total_pendings += $total_price;
-               };
-            };
-         ?>
-         
-        <img class="card-img-top" src="./images/pen3.png" alt="Card image cap" /> 
-        <div class="card-body">
-          <h5 class="card-title">Number Of Pending Orders in ₨</h5>
-          <p class="card-text"> 
-          <?php echo $total_pendings ?>
-          </p>
-          <div class="buttons" style="display: flex;">
-          <a href="admin_orders.php" class="btn btn-primary">Details</a>
-          </div>
-        </div>
-      </div>
-      <div class="card" style="width: 15rem">
-      <?php
-            $total_completed = 0;
-            $select_completed = mysqli_query($conn, "SELECT total_price FROM `confirm_order` WHERE payment_status = 'completed'") or die('query failed');
-            if(mysqli_num_rows($select_completed) > 0){
-               while($fetch_completed = mysqli_fetch_assoc($select_completed)){
-                  $total_price = $fetch_completed['total_price'];
-                  $total_completed += $total_price;
-               };
-            };
-         ?>
-        <img class="card-img-top" src="./images/compn.png" alt="Card image cap" />
-        <div class="card-body">
-          <h5 class="card-title">Number Of Completed Orders in ₨</h5>
-          <p class="card-text">
-          <?php echo $total_completed; ?>
-          </p>
-          <div class="buttons" style="display: flex;">
-          <a href="admin_orders.php" class="btn btn-primary">Details</a>
-          </div>
-        </div>
-      </div>
+    <div class="main_box"> 
       <div class="card" style="width: 15rem">
         <img class="card-img-top" src="./images/orderpn.png" alt="Card image cap" />
         <div class="card-body">
@@ -116,26 +71,6 @@ $msgcount = mysqli_num_rows( $msg_no );
           <?php echo $msgcount; ?>
           </p>
           <a href="message_admin.php" class="btn btn-primary">Details</a>
-        </div>
-      </div>
-      <div class="card" style="width: 15rem">
-        <img class="card-img-top" src="./images/adminpn2.png" alt="Card image cap" />
-        <div class="card-body">
-          <h5 class="card-title">Number Of Registered Admins</h5>
-          <p class="card-text">
-            <?php echo $admin_count; ?>
-          </p>
-          <a href="users_detail.php" class="btn btn-primary">Details</a>
-        </div>
-      </div>
-      <div class="card" style="width: 15rem">
-        <img class="card-img-top" src="./images/userspm.png" alt="Card image cap" />
-        <div class="card-body">
-          <h5 class="card-title">Number Of Registered Users</h5>
-          <p class="card-text">
-            <?php echo $usercount; ?>
-          </p>
-          <a href="users_detail.php" class="btn btn-primary">Details</a>
         </div>
       </div>
       <div class="card" style="width: 15rem">

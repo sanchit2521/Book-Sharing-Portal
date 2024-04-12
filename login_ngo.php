@@ -118,8 +118,10 @@ if (isset($_POST['forgot_password'])) {
             <input type="email" name="email" placeholder="Enter Email Id" required class="text_field">
             <input type="password" name="password" placeholder="Enter password" required class="text_field">
             <input type="submit" value="Login" name="login" class="btn text_field">
-            <p>Forgot your password? <br> <input type="email" name="email" placeholder="Enter Email for Recovery" required class="text_field"> <input type="submit" value="Get Password" name="forgot_password" class="link"></p>
             <p>Don't have an Account? <br> <a class="link" href="Register.php">Sign Up</a><a class="link" href="index.php">Back</a></p>
+        </form>
+        <form action="" method="post">
+            <p>Forgot your password? <br> <input type="email" name="email" placeholder="Enter Email for Recovery" required class="text_field"> <input type="submit" value="Get Password" name="forgot_password" class="link"></p>
         </form>
     </div>
 

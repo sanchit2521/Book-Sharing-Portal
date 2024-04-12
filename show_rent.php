@@ -17,57 +17,65 @@ if (isset($_POST['rent_book'])) {
     // Assuming you have a form with a hidden input field to store the book ID
     $book_id = $_POST['book_id'];
 
-    // Get user information based on rented_by
-    $user_id = $_SESSION['user_id'];
-    $user_query = mysqli_query($conn, "SELECT * FROM users_info WHERE Id = '$user_id'");
-    $user_info = mysqli_fetch_assoc($user_query);
+    // Fetch rented book details including rented_by
+    $fetch_rented_book_query = mysqli_query($conn, "SELECT * FROM rented_book WHERE id = '$book_id'");
+    if ($fetch_rented_book_query && mysqli_num_rows($fetch_rented_book_query) > 0) {
+        $fetch_rented_book = mysqli_fetch_assoc($fetch_rented_book_query);
+        $rented_by = $fetch_rented_book['rented_by'];
 
-    if ($user_info) {
-        $user_email = $user_info['email'];
+        // Get user information based on rented_by
+        $user_query = mysqli_query($conn, "SELECT * FROM users_info WHERE Id = '$rented_by'");
+        if ($user_query && mysqli_num_rows($user_query) > 0) {
+            $user_info = mysqli_fetch_assoc($user_query);
+            $user_email = $user_info['email'];
 
-        // Compose the email message
-        $subject = "Book Rental Confirmation";
-        $message = "Dear " . $user_info['name'] . ",\n\n";
-        $message .= "Thank you for renting the book from our portal.\n\n";
-        $message .= "Book Details:\n";
-        $message .= "Title: " . $_POST['title'] . "\n";
-        $message .= "Author: " . $_POST['author'] . "\n";
-        // Add more book details as needed
-        $message .= "\nPlease return the book on time.\n\n";
-        $message .= "Regards,\nBook Sharing Portal";
+            // Compose the email message
+            $subject = "Book Rental Confirmation";
+            $message = "Dear " . $user_info['name'] . ",\n\n";
+            $message .= "Your book is sucessfully given on renting through our portal\n\n";
+            $message .= "Book Details:\n";
+            $message .= "Title: " . $fetch_rented_book['title'] . "\n";
+            $message .= "Author: " . $fetch_rented_book['author'] . "\n";
+            // Add more book details as needed
+            $message .= "Regards,\nBook Sharing Portal";
 
-        // Send the email using PHPMailer
-        $mail = new PHPMailer(true);
-        try {
-            //Server settings
-            $mail->isSMTP();
-            $mail->Host = 'smtp.office365.com'; // Your SMTP server
-            $mail->SMTPAuth = true;
-            $mail->Username = 'khemnarst21.comp@coeptech.ac.in'; // Your email address
-            $mail->Password = 'Sainath@1234'; // Your email password
-            $mail->SMTPSecure = 'tls';
-            $mail->Port = 587; // Check your SMTP port
+            // Send the email using PHPMailer
+            $mail = new PHPMailer(true);
+            try {
+                //Server settings
+                $mail->isSMTP();
+                $mail->Host = 'smtp.office365.com'; // Your SMTP server
+                $mail->SMTPAuth = true;
+                $mail->Username = 'khemnarst21.comp@coeptech.ac.in'; // Your email address
+                $mail->Password = 'Sainath@1234'; // Your email password
+                $mail->SMTPSecure = 'tls';
+                $mail->Port = 587; // Check your SMTP port
 
-            //Recipients
-            $mail->setFrom('khemnarst21.comp@coeptech.ac.in', 'Book Sharing Portal');
-            $mail->addAddress($user_email, $user_info['name']); // Add recipient
+                //Recipients
+                $mail->setFrom('khemnarst21.comp@coeptech.ac.in', 'Book Sharing Portal');
+                $mail->addAddress($user_email, $user_info['name']); // Add recipient
 
-            // Content
-            $mail->isHTML(false); // Set email format to HTML
-            $mail->Subject = $subject;
-            $mail->Body = $message;
+                // Content
+                $mail->isHTML(false); // Set email format to HTML
+                $mail->Subject = $subject;
+                $mail->Body = $message;
 
-            $mail->send();
-            echo 'Email sent successfully to ' . $user_email;
-        } catch (Exception $e) {
-            echo "Failed to send email: {$mail->ErrorInfo}";
+                $mail->send();
+                echo 'Email sent successfully to ' . $user_email;
+            } catch (Exception $e) {
+                echo "Failed to send email: {$mail->ErrorInfo}";
+            }
+        } else {
+            echo "User not found or invalid user ID.";
         }
     } else {
-        echo "User not found or invalid user ID.";
+        echo "Rented book not found or invalid book ID.";
     }
 }
-
 ?>
+
+
+
 
 <!DOCTYPE html>
 <html lang="en">
@@ -86,7 +94,7 @@ if (isset($_POST['rent_book'])) {
     <section class="show-products">
         <div class="box-container">
             <?php
-            $select_rented_books = mysqli_query($conn, "SELECT * FROM rented_books") or die('Query failed');
+            $select_rented_books = mysqli_query($conn, "SELECT * FROM rented_book") or die('Query failed');
             if (mysqli_num_rows($select_rented_books) > 0) {
                 while ($fetch_rented_book = mysqli_fetch_assoc($select_rented_books)) {
                     // Get user information based on rented_by

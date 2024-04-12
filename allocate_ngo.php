@@ -60,6 +60,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['donate_process'])) {
 ?>
 
 
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
