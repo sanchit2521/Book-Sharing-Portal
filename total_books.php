@@ -7,7 +7,7 @@ $admin_id = $_SESSION['admin_id'];
 
 if(isset($_GET['delete'])){
   $delete_id = $_GET['delete'];
-  mysqli_query($conn, "DELETE FROM `book_info` WHERE bid = '$delete_id'") or die('query failed');
+  mysqli_query($conn, "DELETE FROM `book_info` WHERE book_id = '$delete_id'") or die('query failed');
   header('location:total_books.php');
 }
 
@@ -21,7 +21,7 @@ if(isset($_POST['update_product'])){
   $update_price = $_POST['update_price'];
   $update_category = $_POST['update_category'];
 
-  mysqli_query($conn, "UPDATE `book_info` SET name = '$update_name', title='$update_title', description ='$update_description', price = '$update_price', category='$update_category' WHERE bid = '$update_p_id'") or die('query failed');
+  mysqli_query($conn, "UPDATE `book_info` SET Author = '$update_name', Title='$update_title', Review ='$update_description', Price = '$update_price', category_name='$update_category' WHERE book_id = '$update_p_id'") or die('query failed');
 
   $update_image = $_FILES['update_image']['name'];
   $update_image_tmp_name = $_FILES['update_image']['tmp_name'];
@@ -76,23 +76,40 @@ if(isset($_POST['update_product'])){
    <?php
       if(isset($_GET['update'])){
          $update_id = $_GET['update'];
-         $update_query = mysqli_query($conn, "SELECT * FROM `book_info` WHERE bid = '$update_id'") or die('query failed');
+         $update_query = mysqli_query($conn, "SELECT * FROM `book_info` WHERE book_id = '$update_id'") or die('query failed');
          if(mysqli_num_rows($update_query) > 0){
             while($fetch_update = mysqli_fetch_assoc($update_query)){
    ?>
    <form action="" method="post" enctype="multipart/form-data">
-      <input type="hidden" name="update_p_id" value="<?php echo $fetch_update['bid']; ?>">
+      <input type="hidden" name="update_p_id" value="<?php echo $fetch_update['book_id']; ?>">
       <input type="hidden" name="update_old_image" value="<?php echo $fetch_update['image']; ?>">
       <img src="./added_books/<?php echo $fetch_update['image']; ?>" alt="">
-      <input type="text" name="update_name" value="<?php echo $fetch_update['name']; ?>" class="box" required placeholder="Enter Book Name">
-      <input type="text" name="update_title" value="<?php echo $fetch_update['title']; ?>" class="box" required placeholder="Enter Author Name">
-      <select name="update_category" value="<?php echo $fetch_update['category']; ?> required class="text_field">
-            <option value="Adventure">Adventure</option>
-            <option value="Magic">Magic</option>
-            <option value="knowledge">knowledge</option>
+      <input type="text" name="update_name" value="<?php echo $fetch_update['Author']; ?>" class="box" required placeholder="Enter Book Name">
+      <input type="text" name="update_title" value="<?php echo $fetch_update['Title']; ?>" class="box" required placeholder="Enter Author Name">
+      <select name="update_category" value="<?php echo $fetch_update['category_name']; ?> required class="text_field">
+      <option value="Arts">Arts</option>
+            <option value="Pure Science">Pure Science</option>
+            <option value="CLAT">CLAT</option>
+            <option value="MPSC">MPSC</option>
+            <option value="Agri">Agri</option>
+            <option value="Pharmacy">Pharmacy</option>
+            <option value="LAW">LAW</option>
+            <option value="Medical">Medical</option>
+            <option value="Engineering">Engineering</option>
+            <option value="UPSC">UPSC</option>
+            <option value="Non-fiction">Non-fiction</option>
+            <option value="Fiction">Fiction</option>
+            <option value="Upto 10th">Upto 10th</option>
+            <option value="GATE">GATE</option>
+            <option value="CAT">CAT</option>
+            <option value="CET">CET</option>
+            <option value="NEET">NEET</option>
+            <option value="JEE">JEE</option>
+            <option value="HSC">HSC</option>
+            <option value="SSC">SSC</option>
          </select>
-      <input type="text" name="update_description" value="<?php echo $fetch_update['description']; ?>" class="box" required placeholder="enter product description">
-      <input type="number" name="update_price" value="<?php echo $fetch_update['price']; ?>" min="0" class="box" required placeholder="enter product price">
+      <input type="text" name="update_description" value="<?php echo $fetch_update['Review']; ?>" class="box" required placeholder="enter product description">
+      <input type="number" name="update_price" value="<?php echo $fetch_update['Price']; ?>" min="0" class="box" required placeholder="enter product price">
       <input type="file" class="box" name="update_image" accept="image/jpg, image/jpeg, image/png">
       <input type="submit" value="update" name="update_product" class="delete_btn" >
       <input type="reset" value="cancel" id="close-update" class="update_btn" >
@@ -117,11 +134,11 @@ if(isset($_POST['update_product'])){
       ?>
       <div class="box">
          <img class="books_images" src="added_books/<?php echo $fetch_book['image']; ?>" alt="">
-         <div class="name">Aurthor: <?php echo $fetch_book['title']; ?></div>
-         <div class="name">Name: <?php echo $fetch_book['name']; ?></div>
-         <div class="price">Price: ₹ <?php echo $fetch_book['price']; ?>/-</div>
-         <a href="total_books.php?update=<?php echo $fetch_book['bid']; ?>" class="update_btn">update</a>
-         <a href="total_books.php?delete=<?php echo $fetch_book['bid']; ?>" class="delete_btn" onclick="return confirm('delete this product?');">delete</a>
+         <div class="name">Aurthor: <?php echo $fetch_book['Author']; ?></div>
+         <div class="name">Name: <?php echo $fetch_book['Title']; ?></div>
+         <div class="price">Price: ₹ <?php echo $fetch_book['Price']; ?>/-</div>
+         <a href="total_books.php?update=<?php echo $fetch_book['book_id']; ?>" class="update_btn">update</a>
+         <a href="total_books.php?delete=<?php echo $fetch_book['book_id']; ?>" class="delete_btn" onclick="return confirm('delete this product?');">delete</a>
       </div>
       <?php
          }
