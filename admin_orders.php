@@ -14,10 +14,8 @@ if (!isset($admin_id)) {
 if (isset($_POST['update_order'])) {
 
    $order_update_id = $_POST['order_id'];
-   $update_payment = $_POST['update_payment'];
    $date = date("d.m.Y");
-   mysqli_query($conn, "UPDATE `confirm_order` SET payment_status = '$update_payment',date='$date' WHERE order_id = '$order_update_id'") or die('query failed');
-   $message[] = 'payment status has been updated!';
+   
 }
 
 if (isset($_GET['delete'])) {
@@ -169,12 +167,6 @@ if (isset($_GET['delete'])) {
                   <p> Total price : <span>₹ <?php echo $fetch_book['total_price']; ?>/-</span> </p>
                   <form action="" method="post">
                      <input type="hidden" name="order_id" value="<?php echo $fetch_book['order_id']; ?>">
-                     Payment Status :<select name="update_payment">
-                        <option value="" selected disabled><?php echo $fetch_book['payment_status']; ?></option>
-                        <option value="pending">pending</option>
-                        <option value="completed">completed</option>
-                     </select>
-                     <input type="submit" value="update" name="update_order" class="cart-btn2">
                      <a class="cart-btn1" href="admin_orders.php?delete=<?php echo $fetch_book['order_id']; ?>" onclick="return confirm('delete this order?');">delete</a>
                   </form>
                </div>

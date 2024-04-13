@@ -19,7 +19,6 @@ if (isset($_POST['checkout'])) {
     $name = mysqli_real_escape_string($conn, $_POST['firstname']);
     $number = $_POST['number'];
     $email = mysqli_real_escape_string($conn, $_POST['email']);
-    $method = mysqli_real_escape_string($conn, $_POST['method']);
     $address = mysqli_real_escape_string($conn, $_POST['address']);
     $city = mysqli_real_escape_string($conn, $_POST['city']);
     $state = mysqli_real_escape_string($conn, $_POST['state']);
@@ -59,12 +58,12 @@ if (isset($_POST['checkout'])) {
         $total_books = implode(' ', $cart_products);
 
         // Check if the order already exists
-        $order_query = mysqli_query($conn, "SELECT * FROM `confirm_order` WHERE name = '$name' AND number = '$number' AND email = '$email' AND payment_method = '$method' AND address = '$address' AND total_books = '$total_books' AND total_price = '$cart_total'") or die('Query failed');
+        $order_query = mysqli_query($conn, "SELECT * FROM `confirm_order` WHERE name = '$name' AND number = '$number' AND email = '$email' AND  address = '$address' AND total_books = '$total_books' AND total_price = '$cart_total'") or die('Query failed');
         if (mysqli_num_rows($order_query) > 0) {
             $message[] = 'Order already placed!';
         } else {
             // Insert order details into confirm_order table
-            $result = mysqli_query($conn, "INSERT INTO `confirm_order`(user_id, name, number, email, payment_method, address,total_books, total_price, order_date, added_by) VALUES('$user_id','$name', '$number', '$email','$method', '$full_address', '$total_books', '$cart_total', '$placed_on', '$added_by')") or die('Query failed');
+            $result = mysqli_query($conn, "INSERT INTO `confirm_order`(user_id, name, number, email,  address,total_books, total_price, order_date, added_by) VALUES('$user_id','$name', '$number', '$email', '$full_address', '$total_books', '$cart_total', '$placed_on', '$added_by')") or die('Query failed');
 
             // Retrieve the last inserted ID
             $conn_oid = $conn->insert_id;
@@ -364,26 +363,7 @@ if (isset($_POST['checkout'])) {
                   <p>Grand total : <span class="price" style="color:black">₹ <b><?php echo $grand_total; ?>/-</b></span></p>
                 </div>
               </div>
-              <div style="margin: 20px;">
-                <h3>Payment </h3>
-                <label for="fname">Accepted Payment Gateways</label>
-                <div class="icon-container">
-                  <i class="fa fa-cc-visa" style="color:navy;"></i>
-                  <i class="fa-brands fa-cc-amazon-pay"></i>
-                  <i class="fa-brands fa-google-pay" style="color:red;"></i>
-                  <i class="fa fa-cc-paypal" style="color:#3b7bbf;"></i>
-                </div>
-                <div class="inputBox">
-                  <label for="method">Choose Payment Method :</label>
-                  <select name="method" id="method">
-                    <option value="cash on delivery">Cash on delivery</option>
-                    <option value="Debit card">Debit card</option>
-                    <option value="Amazon Pay">Amazon Pay</option>
-                    <option value="Paypal">Paypal</option>
-                    <option value="Google Pay">Google Pay</option>
-                  </select>
-                </div>
-              </div>
+              
             </div>
 
           </div>
