@@ -83,5 +83,6 @@ while ($row = mysqli_fetch_assoc($result)) {
         </div>
         <?php endforeach; ?>
     </div>
+    <a href="index.php" style="position: fixed; top: 20px; left: 20px;">Home</a>
 </body>
 </html>
